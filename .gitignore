@@ -26,3 +26,7 @@ secrets.properties
 
 # macOS junk
 .DS_Store
+
+# VS Code
+.vscode/
+*.code-workspace
