@@ -1,0 +1,94 @@
+package com.whatiwatch.ai;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import com.whatiwatch.domain.MovieFilter;
+import com.whatiwatch.domain.user.TasteProfile;
+
+class PromptBuilderTest {
+
+    private final PromptBuilder builder = new PromptBuilder();
+
+    @Test
+    void nullProfileIsRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.build(null, new MovieFilter()));
+    }
+
+    @Test
+    void nullFilterIsRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> builder.build(TasteProfile.empty("u1"), null));
+    }
+
+    @Test
+    void newUserPromptUsesGenericFallback() {
+        String prompt = builder.build(TasteProfile.empty("u1"), new MovieFilter());
+
+        // TasteProfile.toPromptContext() returns the new-user fallback
+        assertTrue(prompt.contains("New user"));
+    }
+
+    @Test
+    void promptIncludesTasteContext() {
+        TasteProfile profile = profileWithLovedFilms();
+
+        String prompt = builder.build(profile, new MovieFilter());
+
+        // The loved-films line from toPromptContext() should be present
+        assertTrue(prompt.contains("Parasite"));
+        assertTrue(prompt.contains("Oldboy"));
+    }
+
+    @Test
+    void promptIncludesFilterDetails() {
+        MovieFilter filter = new MovieFilter()
+                .withGenre(28)
+                .withDecade("1990s")
+                .withCountry("JP");
+
+        String prompt = builder.build(profileWithLovedFilms(), filter);
+
+        assertTrue(prompt.contains("1990s"));
+        assertTrue(prompt.contains("JP"));
+        assertTrue(prompt.contains("28"));
+    }
+
+    @Test
+    void excludesWatchedByDefault() {
+        String prompt = builder.build(profileWithLovedFilms(), new MovieFilter());
+
+        assertTrue(prompt.contains("Do not recommend any film the user has already watched"));
+    }
+
+    @Test
+    void includesWatchedWhenFlagIsOn() {
+        MovieFilter filter = new MovieFilter().includeWatched(true);
+
+        String prompt = builder.build(profileWithLovedFilms(), filter);
+
+        assertTrue(prompt.contains("may include films the user has already watched"));
+        assertFalse(prompt.contains("Do not recommend any film the user has already watched"));
+    }
+
+    private TasteProfile profileWithLovedFilms() {
+        return new TasteProfile(
+                "u1",
+                List.of(),               // likedGenres
+                List.of(),               // dislikedGenres
+                List.of(),               // favouriteDirectors
+                List.of(),               // favouriteActors
+                List.of(),               // preferredDecades
+                List.of(),               // preferredCountries
+                List.of(),               // alreadyWatchedTitles
+                List.of("Parasite", "Oldboy"), // highlyRatedTitles
+                List.of(),               // poorlyRatedTitles
+                null                     // aiSummary
+        );
+    }
+}
