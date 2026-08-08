@@ -23,6 +23,7 @@ public class MovieFilter {
     private String decade;
     private String countryCode;
     private String language = "en";
+    private boolean includeWatched = false;
 
     // -------Fluent Setters--------
     public MovieFilter withGenre(int genreId) {
@@ -61,14 +62,20 @@ public class MovieFilter {
         return this;
     }
 
+    public MovieFilter includeWatched(boolean includeWatched) {
+        this.includeWatched = includeWatched;
+        return this;
+    }
+
     // ----- Getters ------
 
     public Set<Integer> getGenreIds() {return genreIds;}
     public List<Movie.Person> getActors() {return actors;}
     public List<Movie.Person> getDirectors() {return directors;}
     public String getDecade() {return decade;}
-    public String gerCountryCode() {return countryCode;}
+    public String getCountryCode() {return countryCode;}
     public String getLanguage() {return language;}
+    public boolean isIncludeWatched() {return includeWatched;}
 
     /* 
     - Convert this filter into TMDB API query parameters.
