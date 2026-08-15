@@ -3,6 +3,7 @@ package com.whatiwatch.tmdb;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -176,5 +177,153 @@ class TmdbMapperTest {
 
         List<Movie.Person> persons = mapper.toPersons(null);
         assertTrue(persons.isEmpty());
+    }
+
+    @Test
+    void toFullMovieMapsGenresFromObjects() throws Exception {
+        JsonNode node = json.readTree("""
+            {
+                "id": 550,
+                "title": "Fight Club",
+                "original_title": "Fight Club",
+                "overview": "",
+                "release_date": "1999-10-15",
+                "vote_average": 8.4,
+                "vote_count": 27000,
+                "poster_path": "",
+                "original_language": "en",
+                "genres": [ { "id": 18, "name": "Drama" }, { "id": 53, "name": "Thriller" } ],
+                "production_countries": [ { "iso_3166_1": "US", "name": "United States" } ],
+                "credits": { "cast": [], "crew": [] }
+            }
+            """);
+
+        Movie movie = mapper.toFullMovie(node);
+
+        assertEquals("Fight Club", movie.title());
+        assertEquals(1999, movie.year());
+        assertEquals(2, movie.genres().size());
+        assertTrue(movie.genres().contains("Drama"));
+        assertTrue(movie.genres().contains("Thriller"));
+    }
+
+    @Test
+    void toFullMovieMapsPrimaryCountry() throws Exception {
+        JsonNode node = json.readTree("""
+            {
+                "id": 1, "title": "T", "original_title": "T", "overview": "",
+                "release_date": "2020-01-01", "vote_average": 7.0, "vote_count": 100,
+                "poster_path": "", "original_language": "en",
+                "genres": [],
+                "production_countries": [
+                    { "iso_3166_1": "KR", "name": "South Korea" },
+                    { "iso_3166_1": "US", "name": "United States" }
+                ],
+                "credits": { "cast": [], "crew": [] }
+            }
+            """);
+
+        Movie movie = mapper.toFullMovie(node);
+
+        assertEquals("KR", movie.countryCode());  // first country wins
+    }
+
+    @Test
+    void toFullMovieHandlesMissingCountry() throws Exception {
+        JsonNode node = json.readTree("""
+            {
+                "id": 1, "title": "T", "original_title": "T", "overview": "",
+                "release_date": "2020-01-01", "vote_average": 7.0, "vote_count": 100,
+                "poster_path": "", "original_language": "en",
+                "genres": [],
+                "production_countries": [],
+                "credits": { "cast": [], "crew": [] }
+            }
+            """);
+
+        Movie movie = mapper.toFullMovie(node);
+
+        assertNull(movie.countryCode());
+    }
+
+    @Test
+    void toFullMovieExtractsDirectorsFromCrew() throws Exception {
+        JsonNode node = json.readTree("""
+            {
+                "id": 1, "title": "T", "original_title": "T", "overview": "",
+                "release_date": "2020-01-01", "vote_average": 7.0, "vote_count": 100,
+                "poster_path": "", "original_language": "en",
+                "genres": [],
+                "production_countries": [],
+                "credits": {
+                    "cast": [],
+                    "crew": [
+                        { "id": 7467, "name": "David Fincher", "job": "Director" },
+                        { "id": 7469, "name": "Jim Uhls", "job": "Screenplay" },
+                        { "id": 1234, "name": "Second Director", "job": "Director" }
+                    ]
+                }
+            }
+            """);
+
+        Movie movie = mapper.toFullMovie(node);
+
+        // Only crew with job == "Director", writers excluded
+        assertEquals(2, movie.directors().size());
+        assertEquals("David Fincher", movie.directors().get(0).name());
+        assertEquals(7467, movie.directors().get(0).id());
+        assertTrue(movie.directors().stream().noneMatch(p -> p.name().equals("Jim Uhls")));
+    }
+
+    @Test
+    void toFullMovieCapsActorsAtTen() throws Exception {
+        // Build a cast of 12 — expect only the first 10 kept
+        StringBuilder cast = new StringBuilder();
+        for (int i = 0; i < 12; i++) {
+            if (i > 0) cast.append(",");
+            cast.append("{ \"id\": ").append(i)
+                .append(", \"name\": \"Actor ").append(i)
+                .append("\", \"order\": ").append(i).append(" }");
+        }
+
+        JsonNode node = json.readTree("""
+            {
+                "id": 1, "title": "T", "original_title": "T", "overview": "",
+                "release_date": "2020-01-01", "vote_average": 7.0, "vote_count": 100,
+                "poster_path": "", "original_language": "en",
+                "genres": [],
+                "production_countries": [],
+                "credits": {
+                    "cast": [ %s ],
+                    "crew": []
+                }
+            }
+            """.formatted(cast.toString()));
+
+        Movie movie = mapper.toFullMovie(node);
+
+        assertEquals(10, movie.actors().size());
+        // Kept in billing order: first is Actor 0, last is Actor 9
+        assertEquals("Actor 0", movie.actors().get(0).name());
+        assertEquals("Actor 9", movie.actors().get(9).name());
+    }
+
+    @Test
+    void toFullMovieHandlesEmptyCredits() throws Exception {
+        JsonNode node = json.readTree("""
+            {
+                "id": 1, "title": "T", "original_title": "T", "overview": "",
+                "release_date": "2020-01-01", "vote_average": 7.0, "vote_count": 100,
+                "poster_path": "", "original_language": "en",
+                "genres": [],
+                "production_countries": [],
+                "credits": { "cast": [], "crew": [] }
+            }
+            """);
+
+        Movie movie = mapper.toFullMovie(node);
+
+        assertTrue(movie.directors().isEmpty());
+        assertTrue(movie.actors().isEmpty());
     }
 }

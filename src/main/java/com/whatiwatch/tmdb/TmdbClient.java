@@ -1,18 +1,19 @@
 package com.whatiwatch.tmdb;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.whatiwatch.config.AppException;
 import com.whatiwatch.domain.Movie;
 import com.whatiwatch.domain.MovieFilter;
+
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /*
 - Client for the TMDB (The Movie Database) API
@@ -98,6 +99,21 @@ public class TmdbClient {
         } catch (IOException e) {
             throw new AppException("Failed to connect to TMDB: " + e.getMessage(), e);
         }
+   }
+
+   /*
+    - Fetches a single movie's full details by ID, incl credits
+    - Maps to TMDB's /movie/{id} endpoint with append_to_response=credits
+   */
+   public Movie getMovie(int id) {
+        String url = HttpUrl.parse(BASE_URL + "/movie/" + id)
+            .newBuilder()
+            .addQueryParameter("append_to_response", "credits")
+            .build()
+            .toString();
+        
+        JsonNode response = get(url);
+        return mapper.toFullMovie(response);
    }
 
 }
