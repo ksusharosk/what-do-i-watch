@@ -17,9 +17,23 @@ class TmdbMapperTest {
     private ObjectMapper json;
 
     @BeforeEach
-    void setUp() {
-        mapper = new TmdbMapper();
+    void setUp() throws Exception {
+
         json   = new ObjectMapper();
+        
+        JsonNode genreNode = json.readTree("""
+            {
+                "genres": [
+                    { "id": 35, "name": "Comedy" },
+                    { "id": 53, "name": "Thriller" },
+                    { "id": 18, "name": "Drama" },
+                    { "id": 28, "name": "Action" }
+                ]
+            }
+            """);
+
+        GenreCache testCache = new GenreCache(() -> genreNode);
+        mapper = new TmdbMapper(testCache);
     }
 
     @Test
@@ -49,6 +63,9 @@ class TmdbMapperTest {
         assertEquals(17000, movie.voteCount());
         assertEquals("ko", movie.language());
         assertEquals(3, movie.genres().size());
+        assertTrue(movie.genres().contains("Comedy"));
+        assertTrue(movie.genres().contains("Thriller"));
+        assertTrue(movie.genres().contains("Drama"));
     }
 
     @Test
