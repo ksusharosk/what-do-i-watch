@@ -32,7 +32,9 @@ public class TmdbClient {
         this.apiToken = apiToken;
         this.http = new OkHttpClient();
         this.json = new ObjectMapper();
-        this.mapper = new TmdbMapper();
+
+        GenreCache genreCache = new GenreCache(this::fetchGenres);
+        this.mapper = new TmdbMapper(genreCache);
     }
 
     /*

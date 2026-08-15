@@ -13,6 +13,15 @@ import com.whatiwatch.domain.Movie;
 */
 public class TmdbMapper {
 
+    private final GenreCache genreCache;
+
+    public TmdbMapper(GenreCache genreCache) {
+        if (genreCache == null) {
+            throw new IllegalArgumentException("genreCache cannot be null");
+        }
+        this.genreCache = genreCache;
+    }
+
     // Maps a JSON array of TMDB movie results into a list of Movie objects
     public List<Movie> toMovies(JsonNode results) {
         if (results == null || !results.isArray()) {
@@ -95,7 +104,7 @@ public class TmdbMapper {
 
         List<String> genres = new ArrayList<>();
         for (JsonNode id : genreIds) {
-            genres.add(String.valueOf(id.asInt()));
+            genres.add(genreCache.nameFor(id.asInt()));
         }
         
         return genres;
