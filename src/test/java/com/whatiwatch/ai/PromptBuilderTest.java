@@ -67,6 +67,16 @@ class PromptBuilderTest {
     }
 
     @Test
+    void promptAsksForJsonArray() {
+        String prompt = builder.build(profileWithLovedFilms(), new MovieFilter());
+
+        // The prompt should instruct the AI to return JSON with the expected fields
+        assertTrue(prompt.contains("JSON"));
+        assertTrue(prompt.contains("\"title\""));
+        assertTrue(prompt.contains("\"pitch\""));
+    }
+
+    @Test
     void includesWatchedWhenFlagIsOn() {
         MovieFilter filter = new MovieFilter().includeWatched(true);
 

@@ -41,9 +41,7 @@ public final class PromptBuilder {
               .append(describeFilter(filter))
               .append("\n");
         
-        prompt.append("\nRecommend up to 5 films. For each, give the title, ")
-              .append("the release year, and one sentence explaining why this ")
-              .append("user in particular would enjoy it. ");
+        prompt.append("\nRecommend up to 5 films.");
         
         if(filter.isIncludeWatched()) {
             prompt.append("You may include films the user has already watched ")
@@ -51,6 +49,14 @@ public final class PromptBuilder {
         } else {
             prompt.append("Do not recommend any film the user has already watched.");
         }
+
+        prompt.append("\nRespond with ONLY a JSON array and nothing else - ")
+              .append("no explanation, no markdown, no code fences. ")
+              .append("Each element must have exactly these fields:\n")
+              .append("[\n")
+              .append(" {\"title\": \"Movie Title\", \"year\": 2019, ")
+              .append("\"pitch\": \"one sentence on why this user would enjoy it\"}\n")
+              .append("]");
 
         return prompt.toString();
 
