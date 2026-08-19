@@ -1,5 +1,7 @@
 package com.whatiwatch.domain.user;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.whatiwatch.domain.user.User;
@@ -37,6 +39,17 @@ public class UserService {
         User newUser = User.newUser(googleId, email, displayName);
         userRepository.save(UserEntity.fromDomain(newUser));
         return newUser;
+    }
+
+    /**
+     * Loads the domain User for a logged-in Google account
+     * 
+     * @param googleId the "sub" claim from the OIDC user
+     * @return the user, if one exists
+     */
+    public Optional<User> findByGoogleId(String googleId) {
+        return userRepository.findByGoogleId(googleId)
+            .map(UserEntity::toDomain);
     }
     
 }
