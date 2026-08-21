@@ -61,7 +61,8 @@ class RatingServiceTest {
     @Test
     void getRatingsReturnsUsersRatings() {
         MovieRating r = MovieRating.create("user1", 550, "Fight Club", 9, null);
-        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.of(MovieRatingEntity.fromDomain(r)));
+        when(repo.findByUserId("user1"))
+                .thenReturn(List.of(MovieRatingEntity.fromDomain(r)));
 
         List<MovieRating> ratings = service.getRatings("user1");
 
@@ -85,8 +86,7 @@ class RatingServiceTest {
     void deleteRemovesExistingRating() {
         MovieRating r = MovieRating.create("user1", 550, "Fight Club", 9, null);
         MovieRatingEntity entity = MovieRatingEntity.fromDomain(r);
-        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
-
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.of(entity));
 
         service.deleteRating("user1", 550);
 
