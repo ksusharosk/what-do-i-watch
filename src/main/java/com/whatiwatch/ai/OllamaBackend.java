@@ -40,7 +40,11 @@ public final class OllamaBackend implements AiBackend {
 
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         this.model = model;
-        this.http = new OkHttpClient();
+        this.http = new OkHttpClient().newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(10))
+            .readTimeout(java.time.Duration.ofMinutes(5))
+            .writeTimeout(java.time.Duration.ofSeconds(30))
+            .build();
         this.mapper = new ObjectMapper();
     }
 

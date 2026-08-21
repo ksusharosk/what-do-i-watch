@@ -12,6 +12,12 @@ import com.whatiwatch.domain.user.UserEntity;
 import com.whatiwatch.domain.user.UserRepository;
 import com.whatiwatch.domain.user.UserPreferences;
 
+import org.springframework.stereotype.Service;
+
+import com.whatiwatch.domain.user.User;
+import com.whatiwatch.domain.user.UserEntity;
+import com.whatiwatch.domain.user.UserRepository;
+
 /**
  * Application-level user operations. Bridges Google OAuth identities to
  * persisted users: on login we either load the existing user or create one.

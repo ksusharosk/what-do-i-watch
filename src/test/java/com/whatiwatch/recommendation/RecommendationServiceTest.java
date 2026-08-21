@@ -81,9 +81,10 @@ class RecommendationServiceTest {
                 """;
 
         // Search returns a matching movie for whatever title it's given
-        BiFunction<String, Integer, List<Movie>> search =
-                (title, year) -> List.of(movie(1, title, year));
-
+        BiFunction<String, Integer, List<Movie>> search = (title, year) -> {
+            int id = title.equals("Parasite") ? 1 : 2;
+            return List.of(movie(id, title, year));
+        };
         RecommendationService service = serviceWith(fakeBackend("groq", aiJson), search);
 
         List<Recommendation> recs = service.recommend(emptyProfile(), new MovieFilter(), "groq");
@@ -178,4 +179,60 @@ class RecommendationServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> service.recommend(null, new MovieFilter(), "groq"));
     }
+
+    @Test
+    void nostalgiaRecommendsFromWatchedFilms() throws Exception {
+        String aiJson = """
+                [
+                  {"title": "Spirited Away", "year": 2001, "pitch": "Cozy comfort classic."}
+                ]
+                """;
+
+        BiFunction<String, Integer, List<Movie>> search =
+                (title, year) -> List.of(movie(1, title, year));
+
+        RecommendationService service = serviceWith(fakeBackend("groq", aiJson), search);
+
+        List<Recommendation> recs = service.recommendNostalgia(
+                List.of("Spirited Away", "Princess Mononoke"),   // loved
+                List.of("Spirited Away", "Some Other Film"),      // watched
+                "cozy",
+                new MovieFilter(),
+                "groq");
+
+        assertEquals(1, recs.size());
+        assertEquals("Spirited Away", recs.get(0).movie().title());
+        assertEquals("Cozy comfort classic.", recs.get(0).aiPitch());
+    }
+
+    @Test
+    void nostalgiaSkipsUnresolvableTitles() throws Exception {
+        String aiJson = """
+                [ {"title": "Nonexistent Film", "year": 1999, "pitch": "..."} ]
+                """;
+
+        // Search resolves nothing
+        BiFunction<String, Integer, List<Movie>> search = (title, year) -> List.of();
+
+        RecommendationService service = serviceWith(fakeBackend("groq", aiJson), search);
+
+        List<Recommendation> recs = service.recommendNostalgia(
+                List.of("Loved Film"), List.of("Watched Film"),
+                "intense", new MovieFilter(), "groq");
+
+        assertTrue(recs.isEmpty());
+    }
+
+    @Test
+    void nostalgiaBackendFailurePropagates() {
+        BiFunction<String, Integer, List<Movie>> search =
+                (title, year) -> List.of(movie(1, title, year));
+
+        RecommendationService service = serviceWith(failingBackend("groq"), search);
+
+        assertThrows(AiUnavailableException.class,
+                () -> service.recommendNostalgia(
+                        List.of("A"), List.of("B"), "cozy", new MovieFilter(), "groq"));
+    }
+
 }
