@@ -28,16 +28,8 @@ public class UserController {
      * (guests get a 401 from the security config)
      */
     @GetMapping("/me")
-    public ResponseEntity<User> me(@AuthenticationPrincipal OidcUser oidcUser) {
-        if (oidcUser == null) {
-            return ResponseEntity.status(401).build();
-        }
-
-        String googleId = oidcUser.getSubject();
-
-        return userService.findByGoogleId(googleId)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.status(404).build());
+    public User me(@AuthenticationPrincipal OidcUser oidcUser) {
+        return userService.requireUser(oidcUser);
     }
     
 }

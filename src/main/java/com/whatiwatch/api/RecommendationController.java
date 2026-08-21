@@ -75,13 +75,7 @@ public class RecommendationController {
             throws AiUnavailableException {
 
         // Login required — a guest has no watch history to draw from.
-        if (oidcUser == null) {
-            throw new AiUnavailableException("Nostalgia mode requires login",
-                    new IllegalStateException("no authenticated user"));
-        }
-        User user = userService.findByGoogleId(oidcUser.getSubject())
-                .orElseThrow(() -> new AiUnavailableException("User not found",
-                        new IllegalStateException("no user for authenticated principal")));
+        User user = userService.requireUser(oidcUser);
 
         // Build the film pools from the user's history.
         List<MovieRating> ratings = ratingRepository.findByUserId(user.id()).stream()

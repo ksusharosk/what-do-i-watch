@@ -28,6 +28,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/health", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/recommendations").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/movies/search").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2

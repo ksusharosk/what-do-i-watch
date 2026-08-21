@@ -11,6 +11,7 @@ import com.whatiwatch.config.AiUnavailableException;
 import com.whatiwatch.config.ApiLimitException;
 import com.whatiwatch.config.InvalidFilterException;
 import com.whatiwatch.config.MovieNotFoundException;
+import com.whatiwatch.config.UnauthorizedException;
 
 /**
  * Translates application exceptions into clean JSON error responses,
@@ -37,6 +38,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MovieNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleMovieNotFound(MovieNotFoundException e) {
         return error(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorized(UnauthorizedException e) {
+        return error(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleBadInput(IllegalArgumentException e) {
+        return error(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     private ResponseEntity<Map<String, String>> error(HttpStatus status, String message) {

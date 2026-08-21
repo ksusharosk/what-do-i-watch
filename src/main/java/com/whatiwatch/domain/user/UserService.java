@@ -1,6 +1,16 @@
 package com.whatiwatch.domain.user;
 
 import java.util.Optional;
+import java.util.List;
+
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.stereotype.Service;
+
+import com.whatiwatch.config.UnauthorizedException;
+import com.whatiwatch.domain.user.User;
+import com.whatiwatch.domain.user.UserEntity;
+import com.whatiwatch.domain.user.UserRepository;
+import com.whatiwatch.domain.user.UserPreferences;
 
 import org.springframework.stereotype.Service;
 
@@ -50,6 +60,51 @@ public class UserService {
     public Optional<User> findByGoogleId(String googleId) {
         return userRepository.findByGoogleId(googleId)
             .map(UserEntity::toDomain);
+    }
+
+    /**
+     * Returns the domain User for the logged-in principal, or throws if there
+     * isn't one. Use in controllers for endpoints that require authentication.
+     *
+     * @param oidcUser the authenticated principal (may be null for guests)
+     * @throws UnauthorizedException if no user is logged in or found
+     */
+    public User requireUser(OidcUser oidcUser) {
+        if (oidcUser == null) {
+            throw new UnauthorizedException("Login required");
+        }
+        return findByGoogleId(oidcUser.getSubject())
+                .orElseThrow(() -> new UnauthorizedException("No user for the authenticated principal"));
+    }
+
+    /**
+     * Updates the given user's preferences (partial — only non-null fields
+     * are changed) and persists the change.
+     */
+    public User updatePreferences(User user,
+                                  List<Integer> preferredGenreIds,
+                                  List<Integer> excludedGenreIds,
+                                  List<String> preferredDecades,
+                                  List<String> preferredCountries,
+                                  String preferredLanguage,
+                                  String aiBackend) {
+        UserPreferences current = user.preferences();
+
+        UserPreferences updated = new UserPreferences(
+                preferredGenreIds != null ? preferredGenreIds : current.preferredGenreIds(),
+                excludedGenreIds != null ? excludedGenreIds : current.excludedGenreIds(),
+                preferredDecades != null ? preferredDecades : current.preferredDecades(),
+                preferredCountries != null ? preferredCountries : current.preferredCountries(),
+                preferredLanguage != null ? preferredLanguage : current.preferredLanguage(),
+                current.favouriteActors(),      // derived, not user-set
+                current.favouriteDirectors(),   // derived, not user-set
+                aiBackend != null ? aiBackend : current.aiBackend(),
+                current.encryptedApiKey()       // handled separately (sensitive)
+        );
+
+        User updatedUser = user.withPreferences(updated);
+        userRepository.save(UserEntity.fromDomain(updatedUser));
+        return updatedUser;
     }
     
 }
