@@ -46,6 +46,11 @@ public record  WatchListEntry(
         );
    }
 
+   //Returns a copy marked as WATCHING
+   public WatchListEntry markAsWatching() {
+        return new WatchListEntry(id, userId, movieId, movieTitle, Status.WATCHING, addedAt, watchedAt);
+   }
+
    //Returns true if the user has already watched this movie.
    public boolean isWatched() {
         return status == Status.WATCHED;

@@ -34,9 +34,8 @@ public class WatchListService {
     public WatchListEntry addOrUpdate(String userId, int movieId, String movieTitle, String status) {
         WatchListEntry.Status newStatus = parseStatus(status);
 
-        WatchListEntryEntity existing = watchlistRepository.findByUserId(userId).stream()
-                .filter(e -> e.getMovieId() == movieId)
-                .findFirst()
+        WatchListEntryEntity existing = watchlistRepository
+                .findByUserIdAndMovieId(userId, movieId)
                 .orElse(null);
 
         if (existing != null) {
@@ -55,9 +54,7 @@ public class WatchListService {
         if (newStatus == WatchListEntry.Status.WATCHED) {
             entry = entry.markAsWatched();
         } else if (newStatus == WatchListEntry.Status.WATCHING) {
-            entry = new WatchListEntry(entry.id(), entry.userId(), entry.movieId(),
-                    entry.movieTitle(), WatchListEntry.Status.WATCHING,
-                    entry.addedAt(), null);
+            entry = entry.markAsWatching();
         }
         watchlistRepository.save(WatchListEntryEntity.fromDomain(entry));
         return entry;
@@ -65,9 +62,7 @@ public class WatchListService {
 
     /** Removes a movie from the watchlist, if present. */
     public void remove(String userId, int movieId) {
-        watchlistRepository.findByUserId(userId).stream()
-                .filter(e -> e.getMovieId() == movieId)
-                .findFirst()
+        watchlistRepository.findByUserIdAndMovieId(userId, movieId)
                 .ifPresent(watchlistRepository::delete);
     }
 

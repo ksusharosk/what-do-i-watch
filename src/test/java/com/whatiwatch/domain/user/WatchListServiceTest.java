@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,8 @@ class WatchListServiceTest {
 
     @Test
     void addNewEntryDefaultsToWantToWatch() {
-        when(repo.findByUserId("user1")).thenReturn(List.of());
+        // No existing entry for this movie -> create path.
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
 
         WatchListEntry entry = service.addOrUpdate("user1", 550, "Fight Club", null);
 
@@ -43,7 +45,8 @@ class WatchListServiceTest {
 
     @Test
     void addWithWatchedStatusMarksWatched() {
-        when(repo.findByUserId("user1")).thenReturn(List.of());
+        // No existing entry -> create path, but requested status is WATCHED.
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
 
         WatchListEntry entry = service.addOrUpdate("user1", 550, "Fight Club", "WATCHED");
 
@@ -54,10 +57,10 @@ class WatchListServiceTest {
 
     @Test
     void updatingExistingEntryToWatchedSetsTimestamp() {
-        // Existing entry is WANT_TO_WATCH, not yet watched.
+        // Existing entry is WANT_TO_WATCH, not yet watched -> update path.
         WatchListEntry existing = WatchListEntry.create("user1", 550, "Fight Club");
         WatchListEntryEntity existingEntity = WatchListEntryEntity.fromDomain(existing);
-        when(repo.findByUserId("user1")).thenReturn(List.of(existingEntity));
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.of(existingEntity));
 
         WatchListEntry result = service.addOrUpdate("user1", 550, "Fight Club", "WATCHED");
 
@@ -68,7 +71,7 @@ class WatchListServiceTest {
 
     @Test
     void invalidStatusIsRejected() {
-        when(repo.findByUserId("user1")).thenReturn(List.of());
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
                 () -> service.addOrUpdate("user1", 550, "Fight Club", "WACHED"));  // typo
@@ -78,8 +81,10 @@ class WatchListServiceTest {
 
     @Test
     void getWatchListReturnsUsersEntries() {
+        // getWatchList lists ALL entries, so it uses findByUserId (not the single-movie lookup).
         WatchListEntry e = WatchListEntry.create("user1", 550, "Fight Club");
-        when(repo.findByUserId("user1")).thenReturn(List.of(WatchListEntryEntity.fromDomain(e)));
+        when(repo.findByUserId("user1"))
+                .thenReturn(List.of(WatchListEntryEntity.fromDomain(e)));
 
         List<WatchListEntry> list = service.getWatchList("user1");
 
@@ -91,10 +96,19 @@ class WatchListServiceTest {
     void removeDeletesExistingEntry() {
         WatchListEntry e = WatchListEntry.create("user1", 550, "Fight Club");
         WatchListEntryEntity entity = WatchListEntryEntity.fromDomain(e);
-        when(repo.findByUserId("user1")).thenReturn(List.of(entity));
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.of(entity));
 
         service.remove("user1", 550);
 
         verify(repo).delete(entity);
+    }
+
+    @Test
+    void removeDoesNothingWhenEntryAbsent() {
+        when(repo.findByUserIdAndMovieId("user1", 999)).thenReturn(Optional.empty());
+
+        service.remove("user1", 999);
+
+        verify(repo, never()).delete(any());
     }
 }
