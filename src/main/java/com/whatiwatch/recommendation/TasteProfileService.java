@@ -27,6 +27,8 @@ public final class TasteProfileService {
     private static final int MAX_ACTORS = 5;
     private final static int MAX_DECADES = 3;
     private final static int MAX_COUNTRIES = 3;
+    private static final int MAX_RATED_TITLES = 20;
+    private static final int MAX_WATCHED_TITLES = 30;
 
     private final Function<Integer, Movie> movieFetcher;
 
@@ -52,12 +54,13 @@ public final class TasteProfileService {
             throw new IllegalArgumentException("watchlist cannot be null");
         }
 
-        List<String> highlyRatedTitles = titlesOf(ratings, MovieRating::isPositive);
-        List<String> poorlyRatedTitles = titlesOf(ratings, MovieRating::isNegative);
+        List<String> highlyRatedTitles = titlesOf(ratings, MovieRating::isPositive, MAX_RATED_TITLES);
+        List<String> poorlyRatedTitles = titlesOf(ratings, MovieRating::isNegative, MAX_RATED_TITLES);
         List<String> alreadyWatchedTitles = watchlist.stream()
                 .filter(WatchListEntry::isWatched)
                 .map(WatchListEntry::movieTitle)
                 .distinct()
+                .limit(MAX_WATCHED_TITLES)
                 .toList();
         
         // No rating history -> generic recommendation
@@ -94,11 +97,13 @@ public final class TasteProfileService {
 
     // Distinct titles of rating matching the predicate
     private List<String> titlesOf(List<MovieRating> ratings, 
-                                java.util.function.Predicate<MovieRating> predicate) {
+                                java.util.function.Predicate<MovieRating> predicate, 
+                                int limit) {
         return ratings.stream()
                 .filter(predicate)
                 .map(MovieRating::movieTitle)
                 .distinct()
+                .limit(limit)
                 .toList();
     }
 
