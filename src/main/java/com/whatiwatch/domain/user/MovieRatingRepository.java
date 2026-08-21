@@ -1,6 +1,7 @@
 package com.whatiwatch.domain.user;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,4 +10,6 @@ public interface MovieRatingRepository extends JpaRepository<MovieRatingEntity, 
     
     // All ratings by a given user - the core query for building a taste profile
     List<MovieRatingEntity> findByUserId(String userId);
+
+    Optional<MovieRatingEntity> findByUserIdAndMovieId(String userId, int movieId);
 }

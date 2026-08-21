@@ -58,6 +58,9 @@ public final class TasteProfileService {
         List<String> poorlyRatedTitles = titlesOf(ratings, MovieRating::isNegative, MAX_RATED_TITLES);
         List<String> alreadyWatchedTitles = watchlist.stream()
                 .filter(WatchListEntry::isWatched)
+                .sorted(java.util.Comparator.comparing(
+                WatchListEntry::watchedAt,
+                java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
                 .map(WatchListEntry::movieTitle)
                 .distinct()
                 .limit(MAX_WATCHED_TITLES)
@@ -101,6 +104,9 @@ public final class TasteProfileService {
                                 int limit) {
         return ratings.stream()
                 .filter(predicate)
+                .sorted(java.util.Comparator.comparing(
+                MovieRating::ratedAt,
+                java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
                 .map(MovieRating::movieTitle)
                 .distinct()
                 .limit(limit)

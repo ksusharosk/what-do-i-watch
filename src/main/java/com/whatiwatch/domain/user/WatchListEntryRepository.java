@@ -1,6 +1,7 @@
 package com.whatiwatch.domain.user;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,7 @@ public interface WatchListEntryRepository extends JpaRepository<WatchListEntryEn
 
     // A user's entires filtered by status, e.g only watched films
     List<WatchListEntryEntity> findByUserIdAndStatus(String userId, WatchListEntry.Status status);
+
+    Optional<WatchListEntryEntity> findByUserIdAndMovieId(String userId, int movieId);
 
 }

@@ -34,9 +34,8 @@ public class RatingService {
     public MovieRating rate(String userId, int movieId, String movieTitle,
                             int rating, String review) {
         // Look for an existing rating of this movie by this user.
-        MovieRatingEntity existing = ratingRepository.findByUserId(userId).stream()
-                .filter(r -> r.getMovieId() == movieId)
-                .findFirst()
+        MovieRatingEntity existing = ratingRepository
+                .findByUserIdAndMovieId(userId, movieId)
                 .orElse(null);
 
         if (existing != null) {
@@ -54,9 +53,7 @@ public class RatingService {
 
     /** Removes a user's rating of a movie, if present. */
     public void deleteRating(String userId, int movieId) {
-        ratingRepository.findByUserId(userId).stream()
-                .filter(r -> r.getMovieId() == movieId)
-                .findFirst()
+        ratingRepository.findByUserIdAndMovieId(userId, movieId)
                 .ifPresent(ratingRepository::delete);
     }
 }

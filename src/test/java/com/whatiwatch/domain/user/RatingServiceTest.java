@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,8 @@ class RatingServiceTest {
     @Test
     void ratingANewMovieSavesIt() {
         // No existing ratings for this user.
-        when(repo.findByUserId("user1")).thenReturn(List.of());
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
+
 
         MovieRating rating = service.rate("user1", 550, "Fight Club", 9, "Great");
 
@@ -47,7 +49,8 @@ class RatingServiceTest {
         // The user already rated movie 550 a 7.
         MovieRating existing = MovieRating.create("user1", 550, "Fight Club", 7, null);
         MovieRatingEntity existingEntity = MovieRatingEntity.fromDomain(existing);
-        when(repo.findByUserId("user1")).thenReturn(List.of(existingEntity));
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.of(existingEntity));
+
 
         MovieRating result = service.rate("user1", 550, "Fight Club", 9, "Changed my mind");
 
@@ -58,7 +61,7 @@ class RatingServiceTest {
     @Test
     void getRatingsReturnsUsersRatings() {
         MovieRating r = MovieRating.create("user1", 550, "Fight Club", 9, null);
-        when(repo.findByUserId("user1")).thenReturn(List.of(MovieRatingEntity.fromDomain(r)));
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.of(MovieRatingEntity.fromDomain(r)));
 
         List<MovieRating> ratings = service.getRatings("user1");
 
@@ -68,7 +71,7 @@ class RatingServiceTest {
 
     @Test
     void invalidRatingIsRejected() {
-        when(repo.findByUserId("user1")).thenReturn(List.of());
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
 
         // MovieRating.create enforces 1–10, so 15 throws.
         assertThrows(IllegalArgumentException.class,
@@ -82,7 +85,8 @@ class RatingServiceTest {
     void deleteRemovesExistingRating() {
         MovieRating r = MovieRating.create("user1", 550, "Fight Club", 9, null);
         MovieRatingEntity entity = MovieRatingEntity.fromDomain(r);
-        when(repo.findByUserId("user1")).thenReturn(List.of(entity));
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
+
 
         service.deleteRating("user1", 550);
 
@@ -91,7 +95,8 @@ class RatingServiceTest {
 
     @Test
     void deleteDoesNothingWhenRatingAbsent() {
-        when(repo.findByUserId("user1")).thenReturn(List.of());
+        when(repo.findByUserIdAndMovieId("user1", 550)).thenReturn(Optional.empty());
+
 
         service.deleteRating("user1", 999);
 
