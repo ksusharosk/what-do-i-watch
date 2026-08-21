@@ -19,7 +19,7 @@ public final class PromptBuilder {
         @param filter  the filters chosen for this request (genre, decade, etc.)
         @return a complete prompt string
      */
-    public String build(TasteProfile profile, MovieFilter filter) {
+    public String build(TasteProfile profile, MovieFilter filter, int count, List<String> excludeTitles) {
         if (profile == null) {
             throw new IllegalArgumentException("TasteProfile cannot be null");
         }
@@ -40,15 +40,14 @@ public final class PromptBuilder {
         prompt.append("== Filters for this request ==\n")
               .append(describeFilter(filter))
               .append("\n");
-        
-        prompt.append("\nRecommend up to 5 films.");
-        
-        if(filter.isIncludeWatched()) {
-            prompt.append("You may include films the user has already watched ")
-                  .append("if they are a strong match.");
-        } else {
-            prompt.append("Do not recommend any film the user has already watched.");
+
+        if(excludeTitles != null && !excludeTitles.isEmpty()) {
+            prompt.append("\n== Do NOT recommend these (already suggested or seen) ==\n")
+                  .append(String.join(", ", excludeTitles))
+                  .append("\n");
         }
+        
+        prompt.append("\nRecommend up to ").append(count).append(" films. ");
 
         prompt.append("\nRespond with ONLY a JSON array and nothing else - ")
               .append("no explanation, no markdown, no code fences. ")
@@ -60,6 +59,70 @@ public final class PromptBuilder {
 
         return prompt.toString();
 
+    }
+
+    // Convenience overload: default count of 5, no exclusions
+    public String build(TasteProfile profile, MovieFilter filter) {
+        return build(profile, filter, 5, List.of());
+    }
+
+    /**
+     * Builds a prompt for nostalgia/rewatch mode: the AI picks films the user
+     * has already watched (preferrung ones they rated highly) that match the given mood and optional filters, for a comfort rewatch
+     * 
+     * @param lovedFilms films user rated highly
+     * @param watchedFilms other films user has watched
+     * @param mood free-text mood, e.g "cozy", "something intense"
+     * @param filter optional genre/decade/etc. filters
+     * @param count how many to recommend
+     */
+    public String buildNostalgia(List<String> lovedFilms,
+                                 List<String> watchedFilms,
+                                 String mood,
+                                 MovieFilter filter,
+                                 int count) {
+        if (filter == null) {
+            throw new IllegalArgumentException("MovieFilter cannot be null");
+        }
+
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("You are a film curator helping someone pick a comforting rewatch. ")
+              .append("Recommend films the user has ALREADY SEEN that fit their mood — ")
+              .append("this is for revisiting old favourites, not discovering new films.\n\n");
+
+        if (mood != null && !mood.isBlank()) {
+            prompt.append("== Mood ==\n").append(mood).append("\n\n");
+        }
+
+        if (lovedFilms != null && !lovedFilms.isEmpty()) {
+            prompt.append("== Films the user loved (prefer these) ==\n")
+                  .append(String.join(", ", lovedFilms))
+                  .append("\n\n");
+        }
+        if (watchedFilms != null && !watchedFilms.isEmpty()) {
+            prompt.append("== Other films the user has watched ==\n")
+                  .append(String.join(", ", watchedFilms))
+                  .append("\n\n");
+        }
+
+        prompt.append("== Filters for this request ==\n")
+              .append(describeFilter(filter))
+              .append("\n");
+
+        prompt.append("\nRecommend up to ").append(count).append(" films for a rewatch. ")
+              .append("Choose ONLY from the films listed above (ones the user has seen). ")
+              .append("Prefer the loved films, and match the mood.\n");
+
+        prompt.append("\nRespond with ONLY a JSON array and nothing else — ")
+              .append("no explanation, no markdown, no code fences. ")
+              .append("Each element must have exactly these fields:\n")
+              .append("[\n")
+              .append("  {\"title\": \"Movie Title\", \"year\": 2019, ")
+              .append("\"pitch\": \"one sentence on why to rewatch this now\"}\n")
+              .append("]");
+
+        return prompt.toString();
     }
 
     /*

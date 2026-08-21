@@ -60,13 +60,6 @@ class PromptBuilderTest {
     }
 
     @Test
-    void excludesWatchedByDefault() {
-        String prompt = builder.build(profileWithLovedFilms(), new MovieFilter());
-
-        assertTrue(prompt.contains("Do not recommend any film the user has already watched"));
-    }
-
-    @Test
     void promptAsksForJsonArray() {
         String prompt = builder.build(profileWithLovedFilms(), new MovieFilter());
 
@@ -74,16 +67,6 @@ class PromptBuilderTest {
         assertTrue(prompt.contains("JSON"));
         assertTrue(prompt.contains("\"title\""));
         assertTrue(prompt.contains("\"pitch\""));
-    }
-
-    @Test
-    void includesWatchedWhenFlagIsOn() {
-        MovieFilter filter = new MovieFilter().includeWatched(true);
-
-        String prompt = builder.build(profileWithLovedFilms(), filter);
-
-        assertTrue(prompt.contains("may include films the user has already watched"));
-        assertFalse(prompt.contains("Do not recommend any film the user has already watched"));
     }
 
     private TasteProfile profileWithLovedFilms() {
@@ -101,4 +84,16 @@ class PromptBuilderTest {
                 null                     // aiSummary
         );
     }
+
+    @Test
+    void nostalgiaPromptIncludesMoodAndConstraint() {
+        String prompt = builder.buildNostalgia(
+                List.of("Parasite"), List.of("Oldboy"),
+                "cozy", new MovieFilter(), 5);
+
+        assertTrue(prompt.contains("cozy"));
+        assertTrue(prompt.contains("Parasite"));
+        assertTrue(prompt.contains("ALREADY SEEN"));   // the rewatch constraint
+    }
+
 }
