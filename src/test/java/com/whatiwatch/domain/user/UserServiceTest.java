@@ -71,7 +71,7 @@ class UserServiceTest {
         assertEquals(List.of(28, 53), updated.preferences().preferredGenreIds());
         assertEquals("fr", updated.preferences().preferredLanguage());
         // Untouched fields keep their original values:
-        assertEquals("ollama", updated.preferences().aiBackend());
+        assertEquals("groq", updated.preferences().aiBackend());
         assertEquals(List.of(), updated.preferences().excludedGenreIds());
 
         verify(repo).save(any(UserEntity.class));
