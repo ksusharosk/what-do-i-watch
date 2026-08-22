@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
+import com.whatiwatch.config.EncryptionService;
 import com.whatiwatch.config.UnauthorizedException;
 import com.whatiwatch.domain.user.User;
 import com.whatiwatch.domain.user.UserEntity;
@@ -26,9 +27,11 @@ import com.whatiwatch.domain.user.UserRepository;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final EncryptionService encryptionService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, EncryptionService encryptionService) {
         this.userRepository = userRepository;
+        this.encryptionService = encryptionService;
     }
 
     /**
@@ -102,6 +105,23 @@ public class UserService {
                 current.encryptedApiKey()       // handled separately (sensitive)
         );
 
+        User updatedUser = user.withPreferences(updated);
+        userRepository.save(UserEntity.fromDomain(updatedUser));
+        return updatedUser;
+    }
+
+    /**
+     * Sets the user's AI backend choice and their API key, 
+     * which is encrypted before storage
+     */
+    public User setApiKey(User user, String aiBackend, String plaintextApiKey) {
+        String encrypted = encryptionService.encrypt(plaintextApiKey);
+
+        UserPreferences current = user.preferences();
+        UserPreferences updated = current.withAiBackend(
+            aiBackend != null ? aiBackend : current.aiBackend(),
+            encrypted);
+        
         User updatedUser = user.withPreferences(updated);
         userRepository.save(UserEntity.fromDomain(updatedUser));
         return updatedUser;

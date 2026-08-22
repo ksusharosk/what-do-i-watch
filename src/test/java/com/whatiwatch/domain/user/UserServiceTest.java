@@ -1,5 +1,6 @@
 package com.whatiwatch.domain.user;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import com.whatiwatch.config.EncryptionService;
 import com.whatiwatch.domain.user.User;
 import com.whatiwatch.domain.user.UserEntity;
 import com.whatiwatch.domain.user.UserRepository;
@@ -20,11 +22,13 @@ class UserServiceTest {
 
     private UserRepository repo;
     private UserService service;
+    private EncryptionService encryptionService;
 
     @BeforeEach
     void setUp() {
         repo = Mockito.mock(UserRepository.class);
-        service = new UserService(repo);
+        encryptionService = Mockito.mock(EncryptionService.class);
+        service = new UserService(repo, encryptionService);
     }
 
     @Test
@@ -85,5 +89,32 @@ class UserServiceTest {
                 updated.preferences().encryptedApiKey());
         assertEquals(user.preferences().favouriteActors(),
                 updated.preferences().favouriteActors());
+    }
+
+        @Test
+    void setApiKeyEncryptsAndStores() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+
+        // Stub the encryptor: plaintext "gsk_raw" -> "ENCRYPTED".
+        when(encryptionService.encrypt("gsk_raw")).thenReturn("ENCRYPTED");
+
+        User updated = service.setApiKey(user, "groq", "gsk_raw");
+
+        // The stored key is the encrypted value, not the plaintext.
+        assertEquals("ENCRYPTED", updated.preferences().encryptedApiKey());
+        assertEquals("groq", updated.preferences().aiBackend());
+        verify(encryptionService).encrypt("gsk_raw");   // encryption was invoked
+        verify(repo).save(any(UserEntity.class));       // and it was persisted
+    }
+
+    @Test
+    void setApiKeyWithNullKeyClearsIt() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+        when(encryptionService.encrypt(null)).thenReturn(null);
+
+        User updated = service.setApiKey(user, "ollama", null);
+
+        assertNull(updated.preferences().encryptedApiKey());
+        verify(repo).save(any(UserEntity.class));
     }
 }

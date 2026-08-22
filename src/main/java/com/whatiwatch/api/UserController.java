@@ -28,8 +28,9 @@ public class UserController {
      * (guests get a 401 from the security config)
      */
     @GetMapping("/me")
-    public User me(@AuthenticationPrincipal OidcUser oidcUser) {
-        return userService.requireUser(oidcUser);
+    public UserResponse me(@AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        return UserResponse.from(user);
     }
     
 }

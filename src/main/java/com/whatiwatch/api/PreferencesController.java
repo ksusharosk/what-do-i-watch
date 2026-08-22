@@ -24,9 +24,9 @@ public class PreferencesController {
 
     /** Get the logged-in user's preferences. */
     @GetMapping
-    public UserPreferences getPreferences(@AuthenticationPrincipal OidcUser oidcUser) {
+    public UserResponse.Preferences getPreferences(@AuthenticationPrincipal OidcUser oidcUser) {
         User user = userService.requireUser(oidcUser);
-        return user.preferences();
+        return UserResponse.from(user).preferences();
     }
 
     /** Update the logged-in user's preferences (partial update). */
@@ -42,5 +42,16 @@ public class PreferencesController {
                 request.preferredLanguage(),
                 request.aiBackend());
         return updated.preferences();
+    }
+
+    /**
+     * Sets the user's API key for their chosen backend. The key is encrypted 
+     * before storage and never returned by any endpoint
+     */
+    @PutMapping("/api-key")
+    public void setApiKey(@RequestBody ApiKeyRequest request,
+                          @AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        userService.setApiKey(user, request.backend(), request.apiKey());
     }
 }
