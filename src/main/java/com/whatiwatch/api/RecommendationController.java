@@ -22,9 +22,11 @@ import com.whatiwatch.domain.user.User;
 import com.whatiwatch.domain.user.WatchListEntry;
 import com.whatiwatch.domain.user.WatchListEntryEntity;
 import com.whatiwatch.domain.user.WatchListEntryRepository;
+import com.whatiwatch.recommendation.AiBackendResolver;
 import com.whatiwatch.recommendation.RecommendationService;
 import com.whatiwatch.recommendation.TasteProfileService;
 import com.whatiwatch.domain.user.UserService;
+import com.whatiwatch.ai.AiBackend;
 
 /**
  * REST endpoint for movie recommendations
@@ -39,17 +41,20 @@ public class RecommendationController {
     private final UserService userService;
     private final MovieRatingRepository ratingRepository;
     private final WatchListEntryRepository watchlistRepository;
+    private final AiBackendResolver backendResolver;
 
     public RecommendationController(RecommendationService recommendationService,
                                     TasteProfileService tasteProfileService,
                                     UserService userService,
                                     MovieRatingRepository ratingRepository,
-                                    WatchListEntryRepository watchlistRepository) {
+                                    WatchListEntryRepository watchlistRepository,
+                                    AiBackendResolver backendResolver) {
         this.recommendationService = recommendationService;
         this.tasteProfileService = tasteProfileService;
         this.userService = userService;
         this.ratingRepository = ratingRepository;
         this.watchlistRepository = watchlistRepository;
+        this.backendResolver = backendResolver;
     }
 
     @PostMapping
@@ -58,12 +63,17 @@ public class RecommendationController {
             throws AiUnavailableException {
         
         MovieFilter filter = buildFilter(request);
-        String backend = (request.backend() != null && !request.backend().isBlank())
+        String backendName = (request.backend() != null && !request.backend().isBlank())
                 ? request.backend()
-                : "ollama"; //deefault backend
+                : "groq"; //deefault backend
     
         TasteProfile profile = buildProfileFor(oidcUser);
         Set<Integer> watchedIds = watchedMovieIdsFor(oidcUser);
+
+        User currentUser = (oidcUser != null)
+                ? userService.findByGoogleId(oidcUser.getSubject()).orElse(null)
+                : null;
+        AiBackend backend = backendResolver.resolve(currentUser, backendName);
 
         return recommendationService.recommend(profile, filter, backend, watchedIds);
     
@@ -100,9 +110,11 @@ public class RecommendationController {
                 .toList();
 
         MovieFilter filter = buildNostalgiaFilter(request);
-        String backend = (request.backend() != null && !request.backend().isBlank())
+        String backendName = (request.backend() != null && !request.backend().isBlank())
                 ? request.backend()
-                : "ollama";
+                : "groq";
+        
+        AiBackend backend = backendResolver.resolve(user, backendName);
 
         return recommendationService.recommendNostalgia(
                 lovedFilms, watchedFilms, request.mood(), filter, backend);

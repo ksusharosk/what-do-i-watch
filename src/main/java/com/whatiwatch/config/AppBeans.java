@@ -102,10 +102,9 @@ public class AppBeans {
 
     @Bean
     public RecommendationService recommendationService(PromptBuilder promptBuilder,
-                                                    AiBackendRegistry registry,
                                                     AiRecommendationParser parser,
                                                     TmdbClient tmdbClient) {
-        return new RecommendationService(promptBuilder, registry, parser, tmdbClient::searchMovie);
+        return new RecommendationService(promptBuilder, parser, tmdbClient::searchMovie);
     }
 
 }

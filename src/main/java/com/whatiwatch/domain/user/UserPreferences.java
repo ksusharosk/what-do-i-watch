@@ -21,7 +21,7 @@ public record UserPreferences(
 ) {
     /*
     - Returns sensible defaults for a new user
-    - No filters set, English language, Ollama as default backend
+    - No filters set, English language, Groq as default backend
     */
    public static UserPreferences defaults() {
     return new UserPreferences(
@@ -32,7 +32,7 @@ public record UserPreferences(
     "en", 
     List.of(), 
     List.of(),
-    "ollama", 
+    "groq", 
     null
     );
    }

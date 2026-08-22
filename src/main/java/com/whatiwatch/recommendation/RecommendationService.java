@@ -26,7 +26,6 @@ import com.whatiwatch.domain.user.TasteProfile;
 public final class RecommendationService {
 
     private final PromptBuilder promptBuilder;
-    private final AiBackendRegistry backends;
     private final AiRecommendationParser parser;
     private final BiFunction<String, Integer, List<Movie>> movieSearch;
 
@@ -35,14 +34,12 @@ public final class RecommendationService {
     private static final int MAX_ATTEMPTS = 3;
 
     public RecommendationService(PromptBuilder promptBuilder,
-                                AiBackendRegistry backends,
                                 AiRecommendationParser parser,
                                 BiFunction<String, Integer, List<Movie>> movieSearch) {
-        if (promptBuilder == null || backends == null || parser == null || movieSearch == null) {
+        if (promptBuilder == null || parser == null || movieSearch == null) {
             throw new IllegalArgumentException("dependancies cannot be null");
         }
         this.promptBuilder = promptBuilder;
-        this.backends = backends;
         this.parser = parser;
         this.movieSearch = movieSearch;
     }
@@ -56,7 +53,7 @@ public final class RecommendationService {
      */
     public List<Recommendation> recommend(TasteProfile profile,
                                           MovieFilter filter,
-                                          String backendName,
+                                          AiBackend backend,
                                           Set<Integer> watchedMovieIds) throws AiUnavailableException {
         if (profile == null) {
             throw new IllegalArgumentException("profile cannot be null");
@@ -64,9 +61,10 @@ public final class RecommendationService {
         if (filter == null) {
             throw new IllegalArgumentException("filter cannot be null");
         }
+        if (backend == null) {
+            throw new IllegalArgumentException("backend cannot be null");
+        }
         Set<Integer> excludeIds = (watchedMovieIds != null) ? watchedMovieIds : Set.of();
-
-        AiBackend backend = backends.get(backendName);
 
         List<Recommendation> collected = new ArrayList<>();
         List<String> suggestedTitles = new ArrayList<>();   // to exclude on retries
@@ -105,13 +103,7 @@ public final class RecommendationService {
         return collected;
     }
 
-    /** Convenience overload with no watched-exclusion (guests / tests). */
-    public List<Recommendation> recommend(TasteProfile profile, MovieFilter filter, String backendName)
-            throws AiUnavailableException {
-        return recommend(profile, filter, backendName, Set.of());
-    }
-
-        /**
+    /**
      * Nostalgia / rewatch recommendations: the AI picks from the user's watched
      * films (preferring loved ones) matching the mood. No watched-exclusion or
      * backfill — the whole point is to draw from films already seen.
@@ -120,12 +112,14 @@ public final class RecommendationService {
                                                    List<String> watchedFilms,
                                                    String mood,
                                                    MovieFilter filter,
-                                                   String backendName) throws AiUnavailableException {
+                                                   AiBackend backend) throws AiUnavailableException {
         if (filter == null) {
             throw new IllegalArgumentException("filter cannot be null");
         }
+        if (backend == null) {
+            throw new IllegalArgumentException("backend cannot be null");
+        }
 
-        AiBackend backend = backends.get(backendName);
         String prompt = promptBuilder.buildNostalgia(lovedFilms, watchedFilms, mood, filter, TARGET_COUNT);
         AiResponse response = backend.complete(prompt);
         List<AiRecommendation> suggestions = parser.parse(response.text());
