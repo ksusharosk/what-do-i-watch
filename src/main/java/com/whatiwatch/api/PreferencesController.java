@@ -54,4 +54,22 @@ public class PreferencesController {
         User user = userService.requireUser(oidcUser);
         userService.setApiKey(user, request.backend(), request.apiKey());
     }
+
+    // Marks onboarding complete
+    @PutMapping("/onboarding-complete")
+    public UserResponse.Preferences completeOnboarding(@AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        User updated = userService.completeOnboarding(user);
+        return UserResponse.from(updated).preferences();
+    }
+
+    // Sets the user's avatar (from the pre-sets)
+    @PutMapping("/avatar")
+    public UserResponse.Preferences setAvatar(@RequestBody AvatarRequest request,
+                                            @AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        User updated = userService.setAvatar(user, request.avatarId());
+        return UserResponse.from(updated).preferences();
+    }
+
 }

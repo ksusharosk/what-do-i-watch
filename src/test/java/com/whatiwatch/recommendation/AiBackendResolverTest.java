@@ -47,7 +47,7 @@ class AiBackendResolverTest {
     private User userWithKey(String encryptedKey) {
         UserPreferences prefs = new UserPreferences(
                 List.of(), List.of(), List.of(), List.of(),
-                "en", List.of(), List.of(), "groq", encryptedKey);
+                "en", List.of(), List.of(), "groq", encryptedKey, false, null);
         User user = User.newUser("google1", "a@example.com", "Alice");
         return user.withPreferences(prefs);
     }

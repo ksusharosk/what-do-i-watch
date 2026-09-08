@@ -17,7 +17,9 @@ public record UserPreferences(
     List<Movie.Person> favouriteActors,
     List<Movie.Person> favouriteDirectors,
     String aiBackend,
-    String encryptedApiKey
+    String encryptedApiKey, 
+    boolean hasCompletedOnboarding,
+    String avatarId
 ) {
     /*
     - Returns sensible defaults for a new user
@@ -33,7 +35,7 @@ public record UserPreferences(
     List.of(), 
     List.of(),
     "groq", 
-    null
+    null, false, null
     );
    }
    //Returns a copy with a different preferred language
@@ -47,7 +49,9 @@ public record UserPreferences(
         favouriteActors, 
         favouriteDirectors, 
         aiBackend, 
-        encryptedApiKey
+        encryptedApiKey, 
+        hasCompletedOnboarding,
+        avatarId
     );
    }
 
@@ -62,8 +66,43 @@ public record UserPreferences(
         favouriteActors, 
         favouriteDirectors, 
         aiBackend, 
-        encryptedApiKey
+        encryptedApiKey, 
+        hasCompletedOnboarding,
+        avatarId
     );
    }
 
+   /** Returns a copy marking onboarding as completed */
+   public UserPreferences withOnboardingCompleted() {
+        return new UserPreferences(
+        preferredGenreIds, 
+        excludedGenreIds, 
+        preferredDecades, 
+        preferredCountries, 
+        preferredLanguage, 
+        favouriteActors, 
+        favouriteDirectors, 
+        aiBackend, 
+        encryptedApiKey, 
+        true,
+        avatarId
+        );
+    }
+
+    /** Returns a copy with a different avatar. */
+    public UserPreferences withAvatar(String avatarId) {
+        return new UserPreferences(
+        preferredGenreIds, 
+        excludedGenreIds, 
+        preferredDecades, 
+        preferredCountries, 
+        preferredLanguage, 
+        favouriteActors, 
+        favouriteDirectors, 
+        aiBackend, 
+        encryptedApiKey, 
+        hasCompletedOnboarding,
+        avatarId
+        );
+    }
 }

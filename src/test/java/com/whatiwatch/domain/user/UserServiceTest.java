@@ -2,7 +2,9 @@ package com.whatiwatch.domain.user;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,6 +30,7 @@ class UserServiceTest {
     private EncryptionService encryptionService;
     private RatingService ratingService;
     private WatchListService watchListService;
+    private RecommendationHistoryService historyService;
 
     @BeforeEach
     void setUp() {
@@ -35,7 +38,8 @@ class UserServiceTest {
         encryptionService = Mockito.mock(EncryptionService.class);
         ratingService = Mockito.mock(RatingService.class);
         watchListService = Mockito.mock(WatchListService.class);
-        service = new UserService(repo, encryptionService, ratingService, watchListService);
+        historyService = Mockito.mock(RecommendationHistoryService.class);
+        service = new UserService(repo, encryptionService, ratingService, watchListService, historyService);
     }
 
     @Test
@@ -172,5 +176,36 @@ class UserServiceTest {
         verify(ratingService).deleteAllForUser(user.id());
         verify(watchListService).deleteAllForUser(user.id());
         verify(repo, never()).delete(any());
+    }
+
+        @Test
+    void completeOnboardingSetsTheFlag() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+        assertFalse(user.preferences().hasCompletedOnboarding());   // starts false
+
+        User updated = service.completeOnboarding(user);
+
+        assertTrue(updated.preferences().hasCompletedOnboarding());
+        verify(repo).save(any(UserEntity.class));
+    }
+
+    @Test
+    void setAvatarAcceptsValidId() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+
+        User updated = service.setAvatar(user, "AVATAR_2");
+
+        assertEquals("AVATAR_2", updated.preferences().avatarId());
+        verify(repo).save(any(UserEntity.class));
+    }
+
+    @Test
+    void setAvatarRejectsUnknownId() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.setAvatar(user, "not_a_real_avatar"));
+
+        verify(repo, never()).save(any());
     }
 }
