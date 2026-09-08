@@ -13,12 +13,6 @@ import com.whatiwatch.domain.user.UserEntity;
 import com.whatiwatch.domain.user.UserRepository;
 import com.whatiwatch.domain.user.UserPreferences;
 
-import org.springframework.stereotype.Service;
-
-import com.whatiwatch.domain.user.User;
-import com.whatiwatch.domain.user.UserEntity;
-import com.whatiwatch.domain.user.UserRepository;
-
 /**
  * Application-level user operations. Bridges Google OAuth identities to
  * persisted users: on login we either load the existing user or create one.
@@ -30,15 +24,18 @@ public class UserService {
     private final EncryptionService encryptionService;
     private final RatingService ratingService;
     private final WatchListService watchListService;
+    private final RecommendationHistoryService historyService;
 
     public UserService(UserRepository userRepository, 
                     EncryptionService encryptionService,
                     RatingService ratingService,
-                    WatchListService watchListService) {
+                    WatchListService watchListService,
+                    RecommendationHistoryService historyService) {
         this.userRepository = userRepository;
         this.encryptionService = encryptionService;
         this.ratingService = ratingService;
         this.watchListService = watchListService;
+        this.historyService = historyService;
     }
 
     /**
@@ -109,7 +106,9 @@ public class UserService {
                 current.favouriteActors(),      // derived, not user-set
                 current.favouriteDirectors(),   // derived, not user-set
                 aiBackend != null ? aiBackend : current.aiBackend(),
-                current.encryptedApiKey()       // handled separately (sensitive)
+                current.encryptedApiKey(),       // handled separately (sensitive)
+                current.hasCompletedOnboarding(),
+                current.avatarId()
         );
 
         User updatedUser = user.withPreferences(updated);
@@ -157,8 +156,26 @@ public class UserService {
     public void deleteAccount(User user) {
         ratingService.deleteAllForUser(user.id());
         watchListService.deleteAllForUser(user.id());
+        historyService.deleteAllForUser(user.id());
         userRepository.findByGoogleId(user.googleId())
             .ifPresent(userRepository::delete);
+    }
+
+    /** Marks the user's onboarding as completed */
+    public User completeOnboarding(User user) {
+        User updated = user.withPreferences(user.preferences().withOnboardingCompleted());
+        userRepository.save(UserEntity.fromDomain(updated));
+        return updated;
+    }
+
+    /** Sets the user's avatar */
+    public User setAvatar(User user, String avatarId) {
+        if (!Avatar.isValid(avatarId)) {
+            throw new IllegalArgumentException("Unknown avatar: " + avatarId);
+        }
+        User updated = user.withPreferences(user.preferences().withAvatar(avatarId));
+        userRepository.save(UserEntity.fromDomain(updated));
+        return updated;
     }
     
 }

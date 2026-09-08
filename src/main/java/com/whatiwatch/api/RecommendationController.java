@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,8 @@ import com.whatiwatch.domain.Recommendation;
 import com.whatiwatch.domain.user.MovieRating;
 import com.whatiwatch.domain.user.MovieRatingEntity;
 import com.whatiwatch.domain.user.MovieRatingRepository;
+import com.whatiwatch.domain.user.RecommendationHistoryService;
+import com.whatiwatch.domain.user.RecommendationHistoryEntry;
 import com.whatiwatch.domain.user.TasteProfile;
 import com.whatiwatch.domain.user.User;
 import com.whatiwatch.domain.user.WatchListEntry;
@@ -42,19 +45,22 @@ public class RecommendationController {
     private final MovieRatingRepository ratingRepository;
     private final WatchListEntryRepository watchlistRepository;
     private final AiBackendResolver backendResolver;
+    private final RecommendationHistoryService historyService;
 
     public RecommendationController(RecommendationService recommendationService,
                                     TasteProfileService tasteProfileService,
                                     UserService userService,
                                     MovieRatingRepository ratingRepository,
                                     WatchListEntryRepository watchlistRepository,
-                                    AiBackendResolver backendResolver) {
+                                    AiBackendResolver backendResolver,
+                                    RecommendationHistoryService historyService) {
         this.recommendationService = recommendationService;
         this.tasteProfileService = tasteProfileService;
         this.userService = userService;
         this.ratingRepository = ratingRepository;
         this.watchlistRepository = watchlistRepository;
         this.backendResolver = backendResolver;
+        this.historyService = historyService;
     }
 
     @PostMapping
@@ -75,7 +81,18 @@ public class RecommendationController {
                 : null;
         AiBackend backend = backendResolver.resolve(currentUser, backendName);
 
-        return recommendationService.recommend(profile, filter, backend, watchedIds);
+        List<Recommendation> recs = 
+                recommendationService.recommend(profile, filter, backend, watchedIds);
+        // Record history for logged-in users only
+        if (currentUser != null && !recs.isEmpty()) {
+            try {
+                recordHistory(currentUser, request, recs);
+            } catch (Exception e) {
+                // History non-critical
+            }
+        }
+
+        return recs;
     
     }
 
@@ -120,6 +137,12 @@ public class RecommendationController {
                 lovedFilms, watchedFilms, request.mood(), filter, backend);
     }
 
+    @GetMapping("/history")
+    public List<RecommendationHistoryEntry> history(@AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        return historyService.getRecent(user.id());
+    }
+
     private MovieFilter buildNostalgiaFilter(NostalgiaRequest request) {
         MovieFilter filter = new MovieFilter();
         if (request.genreIds() != null) {
@@ -135,6 +158,26 @@ public class RecommendationController {
             filter.withLanguage(request.language());
         }
         return filter;
+    }
+
+    private void recordHistory(User user, RecommendationRequest request, List<Recommendation> recs) {
+        List<RecommendationHistoryEntry.RecommendedFilm> films = recs.stream()
+                .map(r -> new RecommendationHistoryEntry.RecommendedFilm(
+                        r.movie().id(),
+                        r.movie().title(),
+                        r.movie().year(),
+                        r.movie().posterPath(),
+                        r.aiPitch()))
+                .toList();
+
+        RecommendationHistoryEntry entry = RecommendationHistoryEntry.create(
+                user.id(),
+                request.mood(),
+                request.genreIds(),
+                request.decade(),
+                films);
+
+        historyService.record(entry);
     }
 
     // Builds a real profile for a logged-in user, or an empty one for a guest

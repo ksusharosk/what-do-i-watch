@@ -24,7 +24,9 @@ public record UserResponse(
             String preferredLanguage,
             List<Movie.Person> favouriteActors,
             List<Movie.Person> favouriteDirectors,
-            String aiBackend
+            String aiBackend,
+            boolean hasCompletedOnboarding,
+            String avatarId
             // note: no encryptedApiKey
     ) {}
 
@@ -43,7 +45,9 @@ public record UserResponse(
                         p.preferredLanguage(),
                         p.favouriteActors(),
                         p.favouriteDirectors(),
-                        p.aiBackend()
+                        p.aiBackend(),
+                        p.hasCompletedOnboarding(),
+                        p.avatarId()
                 )
         );
     }

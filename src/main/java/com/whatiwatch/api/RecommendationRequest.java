@@ -15,5 +15,6 @@ public record RecommendationRequest (
     String decade,
     String country,
     String language,
-    boolean includeWatched
+    boolean includeWatched, 
+    String mood
 ) {}
