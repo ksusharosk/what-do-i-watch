@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.whatiwatch.domain.user.User;
 import com.whatiwatch.domain.user.UserService;
@@ -31,6 +32,12 @@ public class UserController {
     public UserResponse me(@AuthenticationPrincipal OidcUser oidcUser) {
         User user = userService.requireUser(oidcUser);
         return UserResponse.from(user);
+    }
+
+    @DeleteMapping("/me")
+    public void deleteMe(@AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        userService.deleteAccount(user);
     }
     
 }

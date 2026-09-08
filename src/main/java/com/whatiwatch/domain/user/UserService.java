@@ -28,10 +28,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final EncryptionService encryptionService;
+    private final RatingService ratingService;
+    private final WatchListService watchListService;
 
-    public UserService(UserRepository userRepository, EncryptionService encryptionService) {
+    public UserService(UserRepository userRepository, 
+                    EncryptionService encryptionService,
+                    RatingService ratingService,
+                    WatchListService watchListService) {
         this.userRepository = userRepository;
         this.encryptionService = encryptionService;
+        this.ratingService = ratingService;
+        this.watchListService = watchListService;
     }
 
     /**
@@ -125,6 +132,14 @@ public class UserService {
         User updatedUser = user.withPreferences(updated);
         userRepository.save(UserEntity.fromDomain(updatedUser));
         return updatedUser;
+    }
+
+    /** Deletes a user's account entirely */
+    public void deleteAccount(User user) {
+        ratingService.deleteAllForUser(user.id());
+        watchListService.deleteAllForUser(user.id());
+        userRepository.findByGoogleId(user.googleId())
+            .ifPresent(userRepository::delete);
     }
     
 }

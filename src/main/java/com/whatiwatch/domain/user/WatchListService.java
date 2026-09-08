@@ -77,4 +77,10 @@ public class WatchListService {
                     " (expected WANT_TO_WATCH, WATCHING, or WATCHED)");
         }
     }
+
+    /** Deletes all of a user's watchlist entries (when deleting an account) */
+    public void deleteAllForUser (String userId) {
+        List<WatchListEntryEntity> entries = watchlistRepository.findByUserId(userId);
+        watchlistRepository.deleteAll(entries);
+    }
 }
