@@ -56,4 +56,10 @@ public class RatingService {
         ratingRepository.findByUserIdAndMovieId(userId, movieId)
                 .ifPresent(ratingRepository::delete);
     }
+
+    /** Deleted all of a user's ratings (when deleting account) */
+    public void deleteAllForUser(String userId) {
+        List<MovieRatingEntity> entries = ratingRepository.findByUserId(userId);
+        ratingRepository.deleteAll(entries);
+    }
 }

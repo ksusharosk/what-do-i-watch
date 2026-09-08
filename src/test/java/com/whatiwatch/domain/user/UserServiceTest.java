@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +24,16 @@ class UserServiceTest {
     private UserRepository repo;
     private UserService service;
     private EncryptionService encryptionService;
+    private RatingService ratingService;
+    private WatchListService watchListService;
 
     @BeforeEach
     void setUp() {
         repo = Mockito.mock(UserRepository.class);
         encryptionService = Mockito.mock(EncryptionService.class);
-        service = new UserService(repo, encryptionService);
+        ratingService = Mockito.mock(RatingService.class);
+        watchListService = Mockito.mock(WatchListService.class);
+        service = new UserService(repo, encryptionService, ratingService, watchListService);
     }
 
     @Test
@@ -116,5 +121,34 @@ class UserServiceTest {
 
         assertNull(updated.preferences().encryptedApiKey());
         verify(repo).save(any(UserEntity.class));
+    }
+
+        @Test
+    void deleteAccountRemovesRatingsWatchlistAndUser() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+        // The user exists in the repo (so the delete path finds them).
+        when(repo.findByGoogleId("google123"))
+                .thenReturn(Optional.of(UserEntity.fromDomain(user)));
+
+        service.deleteAccount(user);
+
+        // All three deletions happened...
+        verify(ratingService).deleteAllForUser(user.id());
+        verify(watchListService).deleteAllForUser(user.id());
+        verify(repo).delete(any(UserEntity.class));
+    }
+
+    @Test
+    void deleteAccountStillClearsDataWhenUserRecordAbsent() {
+        User user = User.newUser("google123", "a@example.com", "Alice");
+        // User record already gone from the repo.
+        when(repo.findByGoogleId("google123")).thenReturn(Optional.empty());
+
+        service.deleteAccount(user);
+
+        // Ratings/watchlist clearing still runs; user delete is simply skipped.
+        verify(ratingService).deleteAllForUser(user.id());
+        verify(watchListService).deleteAllForUser(user.id());
+        verify(repo, never()).delete(any());
     }
 }
