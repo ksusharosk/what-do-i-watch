@@ -3,6 +3,7 @@ package com.whatiwatch.tmdb;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -142,4 +143,28 @@ public class TmdbClient {
         return mapper.toFullMovie(response);
    }
 
+   /**
+    * Fetches the most voted-on movies, used to seed the onboarding test
+    * Sorted by vote_count.desc
+    */
+   public List<Movie> getWellKnownMovies(int page) {
+        HttpUrl url = HttpUrl.parse(baseUrl + "/discover/movie")
+            .newBuilder()
+            .addQueryParameter("sort_by", "vote_count.desc")
+            .addQueryParameter("vote_count.gte", "1000")
+            .addQueryParameter("page", String.valueOf(page))
+            .build();
+
+        JsonNode response = get(url.toString());
+        return mapper.toMovies(response.get("results"));
+   }
+
+   /* Fetches well-known movies across several pages 9each page = 20 films */
+   public List<Movie> getWellKnownMovies(int startPage, int pages) {
+        List<Movie> all = new ArrayList<>();
+        for (int i = 0; i < pages; i++) {
+            all.addAll(getWellKnownMovies(startPage + i));
+        }
+        return all;
+   }
 }

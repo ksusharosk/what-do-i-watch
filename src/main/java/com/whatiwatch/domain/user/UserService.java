@@ -134,6 +134,25 @@ public class UserService {
         return updatedUser;
     }
 
+    /** Updates the user's display name and persists it */
+    public User updateDisplayName(User user, String newName) {
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException("Display name cannot be null or blank");
+        }
+
+        User updated = new User(
+            user.id(),
+            user.email(),
+            newName.trim(),
+            user.googleId(),
+            user.createdAt(),
+            user.preferences()
+        );
+
+        userRepository.save(UserEntity.fromDomain(updated));
+        return updated;
+    }
+  
     /** Deletes a user's account entirely */
     public void deleteAccount(User user) {
         ratingService.deleteAllForUser(user.id());

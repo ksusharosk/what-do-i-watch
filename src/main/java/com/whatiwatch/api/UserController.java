@@ -4,6 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +36,14 @@ public class UserController {
         return UserResponse.from(user);
     }
 
+    @PutMapping("/me/name")
+    public UserResponse updateName(@RequestBody DisplayNameRequest request,
+                                @AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        User updated = userService.updateDisplayName(user, request.displayName());
+        return UserResponse.from(updated);
+    }  
+    
     @DeleteMapping("/me")
     public void deleteMe(@AuthenticationPrincipal OidcUser oidcUser) {
         User user = userService.requireUser(oidcUser);
