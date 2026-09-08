@@ -35,4 +35,13 @@ public class MovieController {
                               @RequestParam(required = false, defaultValue = "0") int year) {
         return tmdbClient.searchMovie(title, year);
     }
+
+    /** 
+     * Well-known movies (most voted on) to seed the onboarding
+     * Login only
+     */
+    @GetMapping("/well-known")
+    public List<Movie> wellKnown() {
+        return tmdbClient.getWellKnownMovies(1, 2);
+    }
 }

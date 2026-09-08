@@ -2,7 +2,9 @@ package com.whatiwatch.domain.user;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,5 +118,25 @@ class UserServiceTest {
 
         assertNull(updated.preferences().encryptedApiKey());
         verify(repo).save(any(UserEntity.class));
+    }
+
+        @Test
+    void updateDisplayNameChangesTheName() {
+        User user = User.newUser("google123", "a@example.com", "OldName");
+
+        User updated = service.updateDisplayName(user, "NewName");
+
+        assertEquals("NewName", updated.displayName());
+        verify(repo).save(any(UserEntity.class));
+    }
+
+    @Test
+    void updateDisplayNameRejectsBlank() {
+        User user = User.newUser("google123", "a@example.com", "OldName");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.updateDisplayName(user, "  "));
+
+        verify(repo, never()).save(any());
     }
 }
