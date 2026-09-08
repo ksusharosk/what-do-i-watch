@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.whatiwatch.domain.user.User;
 import com.whatiwatch.domain.user.UserService;
@@ -41,6 +42,12 @@ public class UserController {
         User user = userService.requireUser(oidcUser);
         User updated = userService.updateDisplayName(user, request.displayName());
         return UserResponse.from(updated);
+    }  
+    
+    @DeleteMapping("/me")
+    public void deleteMe(@AuthenticationPrincipal OidcUser oidcUser) {
+        User user = userService.requireUser(oidcUser);
+        userService.deleteAccount(user);
     }
     
 }
