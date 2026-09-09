@@ -16,10 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.whatiwatch.domain.user.WatchListEntry;
-import com.whatiwatch.domain.user.WatchListEntryEntity;
-import com.whatiwatch.domain.user.WatchListEntryRepository;
-
 class WatchListServiceTest {
 
     private WatchListEntryRepository repo;

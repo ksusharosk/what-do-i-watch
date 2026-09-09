@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.whatiwatch.config.EncryptionService;
 import com.whatiwatch.config.UnauthorizedException;
-import com.whatiwatch.domain.user.User;
-import com.whatiwatch.domain.user.UserEntity;
-import com.whatiwatch.domain.user.UserRepository;
-import com.whatiwatch.domain.user.UserPreferences;
+
 
 /**
  * Application-level user operations. Bridges Google OAuth identities to

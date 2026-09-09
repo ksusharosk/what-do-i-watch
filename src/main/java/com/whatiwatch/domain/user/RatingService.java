@@ -4,9 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.whatiwatch.domain.user.MovieRating;
-import com.whatiwatch.domain.user.MovieRatingEntity;
-import com.whatiwatch.domain.user.MovieRatingRepository;
 
 /**
  * Manages a user's movie ratings.
