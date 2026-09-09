@@ -5,9 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.whatiwatch.domain.user.RecommendationHistoryEntity;
-import com.whatiwatch.domain.user.RecommendationHistoryEntry;
-import com.whatiwatch.domain.user.RecommendationHistoryRepository;
 
 /** Records and retrieves users' recommendation history */
 @Service
@@ -39,7 +36,7 @@ public class RecommendationHistoryService {
     public void deleteAllForUser(String userId) {
         List<RecommendationHistoryEntity> all = 
             historyRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        historyRepository.deleteAll();
+        historyRepository.deleteAll(all);
     }
     
 }

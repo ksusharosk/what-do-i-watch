@@ -9,7 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.whatiwatch.config.EncryptionService;
-import com.whatiwatch.domain.user.User;
-import com.whatiwatch.domain.user.UserEntity;
-import com.whatiwatch.domain.user.UserRepository;
 
 class UserServiceTest {
 

@@ -4,10 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.whatiwatch.domain.user.WatchListEntry;
-import com.whatiwatch.domain.user.WatchListEntryEntity;
-import com.whatiwatch.domain.user.WatchListEntryRepository;
-
 /**
  * Manages a user's watchlist.
  */
