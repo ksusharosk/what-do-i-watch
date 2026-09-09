@@ -1,0 +1,9 @@
+{
+  "greeting": "Hello! What are you watching today?",
+  "chooseFilm": "Choose a film",
+  "nav": {
+    "profile": "Profile",
+    "search": "Search",
+    "settings": "Settings"
+  }
+}

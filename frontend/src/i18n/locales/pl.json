@@ -1,0 +1,9 @@
+{
+  "greeting": "Cześć! Co dziś oglądamy?",
+  "chooseFilm": "Wybierz film",
+  "nav": {
+    "profile": "Profil",
+    "search": "Szukaj",
+    "settings": "Ustawienia"
+  }
+}
