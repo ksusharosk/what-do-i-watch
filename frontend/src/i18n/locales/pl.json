@@ -1,9 +1,16 @@
 {
-  "greeting": "Cześć! Co dziś oglądamy?",
+  "main": {
+    "greeting": "Co dziś oglądamy?",
+    "moodPlaceholder": "nastrój, klimat, cokolwiek…",
+    "submit": "Znajdź filmy",
+    "nostalgia": "Tryb nostalgii",
+    "nostalgiaLocked": "Oceń co najmniej 5 filmów, aby włączyć tryb nostalgii"
+  },
   "chooseFilm": "Wybierz film",
   "nav": {
     "profile": "Profil",
     "search": "Szukaj",
     "settings": "Ustawienia"
-  }
+  },
+  "auth": { "login": "Войти через Google" }
 }

@@ -1,9 +1,15 @@
 {
-  "greeting": "Привет! Что смотрим сегодня?",
+  "main": { "greeting": "Что сегодня посмотрим?",
+    "moodPlaceholder": "настроение, атмосфера, что угодно…",
+    "submit": "Найти фильмы",
+    "nostalgia": "Режим ностальгии",
+    "nostalgiaLocked": "Оцените минимум 5 фильмов, чтобы включить режим ностальгии" 
+  },
   "chooseFilm": "Выбрать фильм",
   "nav": {
     "profile": "Профиль",
     "search": "Поиск",
     "settings": "Настройки"
-  }
+  },
+  "auth": { "login": "Zaloguj się przez Google" }
 }
