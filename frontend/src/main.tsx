@@ -8,6 +8,7 @@ import MainPage from './pages/MainPage'
 import SearchPage from './pages/SearchPage'
 import UserPage from './pages/UserPage'
 import SettingsPage from './pages/SettingsPage'
+import { AppLayout } from './components/layout/AppLayout'
 
 const queryClient = new QueryClient()
 
@@ -16,10 +17,12 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
         <BrowserRouter>
         <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/profile" element={<UserPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/profile" element={<UserPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

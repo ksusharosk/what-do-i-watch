@@ -1,9 +1,15 @@
 {
-  "greeting": "Hello! What are you watching today?",
+  "main": { "greeting": "What are we watching today?",
+    "moodPlaceholder": "mood, vibe, anything…",
+    "submit": "Find films",
+    "nostalgia": "Nostalgia mode",
+    "nostalgiaLocked": "Watch and rate at least 5 films to use nostalgia mode" 
+  },
   "chooseFilm": "Choose a film",
   "nav": {
     "profile": "Profile",
     "search": "Search",
     "settings": "Settings"
-  }
+  },
+  "auth": { "login": "Log in via Google" }
 }
