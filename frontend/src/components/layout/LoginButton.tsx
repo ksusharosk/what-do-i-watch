@@ -12,7 +12,7 @@ export function LoginButton() {
 
   const login = () => {
     // Redirect the browser to the backend's Google OAuth entry point.
-    window.location.href = "/oauth2/authorization/google";
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
   };
 
   return (
