@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .userInfoEndpoint(userInfo -> userInfo
                     .oidcUserService(customOAuth2UserService)
                 )
+                .defaultSuccessUrl("http://localhost:5173", true)
             )   
             // Unauthenticated requests get a 401 instead of a redirect to Google.
             .exceptionHandling(ex -> ex

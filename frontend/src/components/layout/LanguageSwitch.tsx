@@ -18,7 +18,7 @@ export function LanguageSwitch() {
     <div className="flex flex-col items-end gap-2">
       <button
         onClick={() => setOpen(!open)}
-        className="rounded-full bg-card px-5 py-2 text-sidebar-foreground font-medium uppercase shadow-elevated"
+        className="rounded-full bg-card px-5 py-2 text-sidebar-foreground font-medium uppercase shadow-y4 transition-colors hover:bg-primary hover:text-primary-foreground"
       >
         {current}
       </button>

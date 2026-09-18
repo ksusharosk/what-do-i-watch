@@ -3,7 +3,14 @@
     "moodPlaceholder": "mood, vibe, anything…",
     "submit": "Find films",
     "nostalgia": "Nostalgia mode",
-    "nostalgiaLocked": "Watch and rate at least 5 films to use nostalgia mode" 
+    "nostalgiaLocked": "Watch and rate at least 5 films to use nostalgia mode",
+    "filters" : "filters",
+    "genre": "genre",
+    "decade": "decade", 
+    "country": "country", 
+    "searchCountries": "search countries…",
+    "more": "+{{count}} more",
+    "searchGenres": "search genres…" 
   },
   "chooseFilm": "Choose a film",
   "nav": {

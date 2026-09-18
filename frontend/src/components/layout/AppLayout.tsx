@@ -9,7 +9,7 @@ export function AppLayout() {
       <Sidebar />
 
       {/* Main content area, positioned so we can float things in its corners */}
-      <main className="flex-1 relative">
+      <main className="flex-1 relative overflow-y-hidden">
         {/* Top-right controls, floating above the page */}
         <div className="absolute top-4 right-4 z-20 flex items-start gap-3">
           <LoginButton />

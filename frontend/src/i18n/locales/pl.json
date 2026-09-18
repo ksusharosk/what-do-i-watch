@@ -4,7 +4,14 @@
     "moodPlaceholder": "nastrój, klimat, cokolwiek…",
     "submit": "Znajdź filmy",
     "nostalgia": "Tryb nostalgii",
-    "nostalgiaLocked": "Oceń co najmniej 5 filmów, aby włączyć tryb nostalgii"
+    "nostalgiaLocked": "Oceń co najmniej 5 filmów, aby włączyć tryb nostalgii",
+    "filters": "filtry",
+    "genre": "gatunek",
+    "decade": "dekada", 
+    "country": "kraj", 
+    "searchCountries": "szukaj krajów…",
+    "more": "+{{count}} gatunków",
+    "searchGenres": "szukaj gatunków…"
   },
   "chooseFilm": "Wybierz film",
   "nav": {

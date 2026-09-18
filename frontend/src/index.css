@@ -139,4 +139,19 @@
   html {
     @apply font-sans;
     }
+  /* Thin scrollbar with a purple pill thumb, transparent track */
+  .scrollbar-pill {
+    scrollbar-width: thin;                        /* Firefox: thin bar */
+    scrollbar-color: var(--primary) transparent;  /* Firefox: thumb color, track color */
+  }
+  .scrollbar-pill::-webkit-scrollbar {
+    height: 6px;                                  /* horizontal scrollbar thickness */
+  }
+  .scrollbar-pill::-webkit-scrollbar-track {
+    background: transparent;                       /* no visible track */
+  }
+  .scrollbar-pill::-webkit-scrollbar-thumb {
+    background: var(--primary);                     /* purple thumb */
+    border-radius: 999px;                          /* pill shape */
+  }
 }
