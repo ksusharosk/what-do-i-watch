@@ -24,6 +24,9 @@ public class MovieFilter {
     private String countryCode;
     private String language = "en";
     private boolean includeWatched = false;
+    private final List<String> genreNames = new ArrayList<>();
+    private final List<String> decades = new ArrayList<>();
+    private final List<String> countries = new ArrayList<>();
 
     // -------Fluent Setters--------
     public MovieFilter withGenre(int genreId) {
@@ -67,6 +70,21 @@ public class MovieFilter {
         return this;
     }
 
+    public MovieFilter withGenreName(String name) {
+        if (name != null && !name.isBlank()) genreNames.add(name);
+        return this;
+    }
+
+    public MovieFilter withDecadeLabel(String decade) {
+        if (decade != null && !decade.isBlank()) decades.add(decade);
+        return this;
+    }
+
+    public MovieFilter withCountryLabel(String country) {
+        if (country != null && !country.isBlank()) countries.add(country);
+        return this;
+    }
+
     // ----- Getters ------
 
     public Set<Integer> getGenreIds() {return genreIds;}
@@ -76,6 +94,9 @@ public class MovieFilter {
     public String getCountryCode() {return countryCode;}
     public String getLanguage() {return language;}
     public boolean isIncludeWatched() {return includeWatched;}
+    public List<String> getGenreNames() { return genreNames; }
+    public List<String> getDecades() { return decades; }
+    public List<String> getCountries() { return countries; }
 
     /* 
     - Convert this filter into TMDB API query parameters.

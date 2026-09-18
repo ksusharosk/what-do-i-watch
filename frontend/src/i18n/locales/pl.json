@@ -7,11 +7,19 @@
     "nostalgiaLocked": "Oceń co najmniej 5 filmów, aby włączyć tryb nostalgii",
     "filters": "filtry",
     "genre": "gatunek",
-    "decade": "dekada", 
-    "country": "kraj", 
+    "decade": "dekada",
+    "country": "kraj",
+    "searchGenres": "szukaj gatunków…",
     "searchCountries": "szukaj krajów…",
-    "more": "+{{count}} gatunków",
-    "searchGenres": "szukaj gatunków…"
+    "more": "+{{count}} więcej",
+    "searching": "Szukam filmów…",
+    "searchError": "Coś poszło nie tak. Spróbuj ponownie.",
+    "noResults": "Nie znaleziono rekomendacji.",
+    "resultsIntro": "Oto filmy, które moim zdaniem najlepiej pasują do Twojego nastroju i filtrów…",
+    "director": "Reżyseria",
+    "cast": "Obsada",
+    "like": "Polub",
+    "markWatched": "Oznacz jako obejrzane"
   },
   "chooseFilm": "Wybierz film",
   "nav": {
@@ -19,5 +27,5 @@
     "search": "Szukaj",
     "settings": "Ustawienia"
   },
-  "auth": { "login": "Войти через Google" }
+  "auth": { "login": "Zaloguj się przez Google" }
 }

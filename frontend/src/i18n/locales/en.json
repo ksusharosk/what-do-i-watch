@@ -10,7 +10,15 @@
     "country": "country", 
     "searchCountries": "search countries…",
     "more": "+{{count}} more",
-    "searchGenres": "search genres…" 
+    "searchGenres": "search genres…",
+    "searching": "Finding films…",
+    "searchError": "Something went wrong. Try again.",
+    "noResults": "No recommendations found.",
+    "resultsIntro": "This is why I think below films would work best for your mood and filters…",
+    "director": "Director",
+    "cast": "Cast",
+    "like": "Like",
+    "markWatched": "Mark as watched" 
   },
   "chooseFilm": "Choose a film",
   "nav": {

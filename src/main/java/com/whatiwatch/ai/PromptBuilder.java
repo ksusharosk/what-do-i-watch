@@ -19,7 +19,7 @@ public final class PromptBuilder {
         @param filter  the filters chosen for this request (genre, decade, etc.)
         @return a complete prompt string
      */
-    public String build(TasteProfile profile, MovieFilter filter, int count, List<String> excludeTitles) {
+    public String build(TasteProfile profile, MovieFilter filter, int count, List<String> excludeTitles, String mood) {
         if (profile == null) {
             throw new IllegalArgumentException("TasteProfile cannot be null");
         }
@@ -36,6 +36,12 @@ public final class PromptBuilder {
         prompt.append("== User taste ==\n")
               .append(profile.toPromptContext())
               .append("\n\n");
+
+        if (mood != null && !mood.isBlank()) {
+            prompt.append("== Mood / vibe for this request ==\n")
+                  .append(mood)
+                  .append("\n\n");
+        }
 
         prompt.append("== Filters for this request ==\n")
               .append(describeFilter(filter))
@@ -63,7 +69,7 @@ public final class PromptBuilder {
 
     // Convenience overload: default count of 5, no exclusions
     public String build(TasteProfile profile, MovieFilter filter) {
-        return build(profile, filter, 5, List.of());
+        return build(profile, filter, 5, List.of(), null);
     }
 
     /**
@@ -131,17 +137,14 @@ public final class PromptBuilder {
     private String describeFilter(MovieFilter filter) {
         List<String> parts = new ArrayList<>();
 
-        if (!filter.getGenreIds().isEmpty()) {
-            String genres = filter.getGenreIds().stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(", "));
-            parts.add("Genre IDs: " + genres);
+        if (!filter.getGenreNames().isEmpty()) {
+            parts.add("Genres: " + String.join(", ", filter.getGenreNames()));
         }
-        if (filter.getDecade() != null) {
-            parts.add("Country: " + filter.getDecade());
+        if (!filter.getDecades().isEmpty()) {
+            parts.add("Decades: " + String.join(", ", filter.getDecades()));
         }
-        if (filter.getCountryCode() != null) {
-            parts.add("Country: " + filter.getCountryCode());
+        if (!filter.getCountries().isEmpty()) {
+            parts.add("Countries: " + String.join(", ", filter.getCountries()));
         }
         if (!filter.getActors().isEmpty()) {
             parts.add("Actors: " + joinNames(filter.getActors()));

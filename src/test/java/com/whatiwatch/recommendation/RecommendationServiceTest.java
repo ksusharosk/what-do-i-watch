@@ -89,7 +89,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         List<Recommendation> recs =
-                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of());
+                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(), null);
 
         assertEquals(2, recs.size());
         assertEquals("Parasite", recs.get(0).movie().title());
@@ -114,7 +114,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         List<Recommendation> recs =
-                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of());
+                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(), null);
 
         assertEquals(1, recs.size());
         assertEquals("Real Movie", recs.get(0).movie().title());
@@ -135,7 +135,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         List<Recommendation> recs =
-                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of());
+                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(), null);
 
         assertEquals(1, recs.get(0).movie().id());   // the top result
     }
@@ -149,7 +149,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         List<Recommendation> recs =
-                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of());
+                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(), null);
 
         assertTrue(recs.isEmpty());
     }
@@ -163,7 +163,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         assertThrows(AiUnavailableException.class,
-                () -> service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of()));
+                () -> service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(), null));
     }
 
     @Test
@@ -175,7 +175,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.recommend(null, new MovieFilter(), backend, Set.of()));
+                () -> service.recommend(null, new MovieFilter(), backend, Set.of(), null));
     }
 
     @Test
@@ -186,7 +186,7 @@ class RecommendationServiceTest {
         RecommendationService service = serviceWith(search);
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.recommend(emptyProfile(), new MovieFilter(), null, Set.of()));
+                () -> service.recommend(emptyProfile(), new MovieFilter(), null, Set.of(), null));
     }
 
     @Test
@@ -207,7 +207,7 @@ class RecommendationServiceTest {
 
         // Movie id 100 ("Seen It") is in the watched set → should be filtered out.
         List<Recommendation> recs =
-                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(100));
+                service.recommend(emptyProfile(), new MovieFilter(), backend, Set.of(100), null);
 
         assertEquals(1, recs.size());
         assertEquals("Fresh One", recs.get(0).movie().title());

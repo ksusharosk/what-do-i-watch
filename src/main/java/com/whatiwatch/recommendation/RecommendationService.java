@@ -54,7 +54,8 @@ public final class RecommendationService {
     public List<Recommendation> recommend(TasteProfile profile,
                                           MovieFilter filter,
                                           AiBackend backend,
-                                          Set<Integer> watchedMovieIds) throws AiUnavailableException {
+                                          Set<Integer> watchedMovieIds,
+                                          String mood) throws AiUnavailableException {
         if (profile == null) {
             throw new IllegalArgumentException("profile cannot be null");
         }
@@ -71,7 +72,7 @@ public final class RecommendationService {
         Set<Integer> collectedIds = new HashSet<>();         // avoid duplicate movies
 
         for (int attempt = 0; attempt < MAX_ATTEMPTS && collected.size() < TARGET_COUNT; attempt++) {
-            String prompt = promptBuilder.build(profile, filter, OVER_REQUEST, suggestedTitles);
+            String prompt = promptBuilder.build(profile, filter, OVER_REQUEST, suggestedTitles, mood);
             AiResponse response = backend.complete(prompt);
             List<AiRecommendation> suggestions = parser.parse(response.text());
 
