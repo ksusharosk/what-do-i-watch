@@ -12,6 +12,9 @@ import java.util.List;
 public record RecommendationRequest (
     String backend,
     List<Integer> genreIds,
+    List<String> genreNames,
+    List<String> decades,
+    List<String> countries,
     String decade,
     String country,
     String language,

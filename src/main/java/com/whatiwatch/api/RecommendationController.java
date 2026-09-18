@@ -82,7 +82,7 @@ public class RecommendationController {
         AiBackend backend = backendResolver.resolve(currentUser, backendName);
 
         List<Recommendation> recs = 
-                recommendationService.recommend(profile, filter, backend, watchedIds);
+                recommendationService.recommend(profile, filter, backend, watchedIds, request.mood());
         // Record history for logged-in users only
         if (currentUser != null && !recs.isEmpty()) {
             try {
@@ -174,7 +174,7 @@ public class RecommendationController {
                 user.id(),
                 request.mood(),
                 request.genreIds(),
-                request.decade(),
+                request.decades() != null ? String.join(", ", request.decades()) : null,
                 films);
 
         historyService.record(entry);
@@ -223,11 +223,14 @@ public class RecommendationController {
         if (request.genreIds() != null) {
             request.genreIds().forEach(filter::withGenre);
         }
-        if (request.decade() != null && !request.decade().isBlank()) {
-            filter.withDecade(request.decade());
+        if (request.genreNames() != null) {
+            request.genreNames().forEach(filter::withGenreName);
         }
-        if (request.country() != null && !request.country().isBlank()) {
-            filter.withCountry(request.country());
+        if (request.decades() != null) {
+            request.decades().forEach(filter::withDecadeLabel);
+        }
+        if (request.countries() != null) {
+            request.countries().forEach(filter::withCountryLabel);
         }
         if (request.language() != null && !request.language().isBlank()) {
             filter.withLanguage(request.language());

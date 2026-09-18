@@ -47,15 +47,15 @@ class PromptBuilderTest {
     @Test
     void promptIncludesFilterDetails() {
         MovieFilter filter = new MovieFilter()
-                .withGenre(28)
-                .withDecade("1990s")
-                .withCountry("JP");
+                .withGenreName("action")
+                .withDecadeLabel("1990s")
+                .withCountryLabel("Japan");
 
         String prompt = builder.build(profileWithLovedFilms(), filter);
 
         assertTrue(prompt.contains("1990s"));
-        assertTrue(prompt.contains("JP"));
-        assertTrue(prompt.contains("28"));
+        assertTrue(prompt.contains("Japan"));
+        assertTrue(prompt.contains("action"));
     }
 
     @Test
